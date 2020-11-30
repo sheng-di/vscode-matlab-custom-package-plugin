@@ -24,6 +24,34 @@ function matchAddPath(str) {
 }
 
 /**
+ * Get quick suggestions like ones provided by vscode
+ * for the reason that custom completion will overwrite original quick subbestions.
+ * @param {string}} content current file's content
+ */
+function getQuickSuggestions(content) {
+  // Case 1: variableName = xxx
+  // Case 2: at function line
+  const regex = /\b([\w_]+)\b/gm
+  let m
+  let res = new Set()
+
+  while ((m = regex.exec(content)) !== null) {
+    // This is necessary to avoid infinite loops with zero-width matches
+    if (m.index === regex.lastIndex) {
+      regex.lastIndex++
+    }
+
+    // The result can be accessed through the `m`-variable.
+    m.forEach((match, groupIndex) => {
+      res.add(match)
+    })
+  }
+  const keywordSet = new Set(['break', 'case', 'catch', 'classdef', 'continue', 'else', 'elseif', 'end', 'for', 'function', 'global', 'if', 'otherwise', 'parfor', 'persistent', 'return', 'spmd', 'switch', 'try', 'while'])
+
+  return [...res].filter(v => /[^0-9]\S+/.test(v) && !keywordSet.has(v))
+}
+
+/**
  * Get the commands to show
  * @param {string} fileName file name
  * @param {string} content current file's content
@@ -52,7 +80,10 @@ function getCommands(fileName, content) {
     arr = arr.concat(mFileNames)
   })
 
-  return arr
+  const quickSuggestions = getQuickSuggestions(content)
+  arr = arr.concat(quickSuggestions)
+
+  return [...new Set(arr)]
 }
 
 /**
@@ -99,5 +130,6 @@ function getRowCol(content, word) {
 
 module.exports = {
   getCommands,
-  getRowCol
+  getRowCol,
+  getCurrentFileVariables: getQuickSuggestions,
 }
