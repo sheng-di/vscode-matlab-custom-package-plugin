@@ -12,6 +12,7 @@
   "activationEvents": [
     "onLanguage:matlab"
   ],
+  "icon": "images/icon.png",
   "main": "./src/extension.js",
   "contributes": {},
   "repository": {
