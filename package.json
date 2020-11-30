@@ -10,17 +10,13 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:matlabCustomPackage.helloWorld",
     "onLanguage:matlab"
   ],
   "main": "./src/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "matlabCustomPackage.helloWorld",
-        "title": "Hello World"
-      }
-    ]
+  "contributes": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/378978764/vscode-matlab-custom-package-plugin"
   },
   "scripts": {
     "lint": "eslint .",
