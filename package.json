@@ -13,6 +13,7 @@
     "onLanguage:matlab"
   ],
   "icon": "images/icon.png",
+  "publisher": "shengdi",
   "main": "./src/extension.js",
   "contributes": {},
   "repository": {
