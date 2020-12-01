@@ -11,11 +11,15 @@
   ],
   "activationEvents": [
     "*"
-	],
-	"icon": "images/icon.png",
+  ],
+  "icon": "images/icon.png",
   "publisher": "shengdi",
   "main": "./dist/extension.js",
   "contributes": {},
+  "repository": {
+    "type": "git",
+    "url": "repository"
+  },
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "webpack --devtool nosources-source-map --config ./build/node-extension.webpack.config.js",
