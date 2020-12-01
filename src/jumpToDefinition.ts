@@ -1,3 +1,5 @@
+import { ExtensionContext, Position } from 'vscode'
+import { TextDocument } from 'vscode'
 const vscode = require('vscode');
 const tool = require('./tool');
 
@@ -6,10 +8,10 @@ const tool = require('./tool');
  * @param {*} document current document
  * @param {*} position current position
  */
-function provideDefinition(document, position) {
-    const fileName    = document.fileName;
-    const word        = document.getText(document.getWordRangeAtPosition(position));
-    
+function provideDefinition(document: TextDocument, position: Position) {
+    const fileName = document.fileName;
+    const word = document.getText(document.getWordRangeAtPosition(position));
+
     const p = tool.getRowCol(document.getText(), word);
     if (p) {
         // Only match current file.
@@ -18,7 +20,7 @@ function provideDefinition(document, position) {
     }
 }
 
-module.exports = function(context) {
+export default function (context: ExtensionContext) {
     // 注册如何实现跳转到定义，第一个参数表示仅对json文件生效
     context.subscriptions.push(vscode.languages.registerDefinitionProvider(['matlab'], {
         provideDefinition

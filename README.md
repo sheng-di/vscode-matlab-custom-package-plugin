@@ -4,5 +4,6 @@ Github repository: [Matlab Custom Package Plugin](https://github.com/378978764/v
 
 1. Auto-completion of custom package, including `current directory`, `paths in addpath command`.
 2. Jump-to-definition of current file, including `body`, `functin line`
+3. Variable rename in current file.
 
 **Enjoy!**

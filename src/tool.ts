@@ -5,10 +5,10 @@ const fs = require("fs")
  * Match and return dir paths in `addpath` command
  * @param {string} str current document content
  */
-function matchAddPath(str) {
-  let addPaths = []
+function matchAddPath(str: string) {
+  let addPaths: Array<string> = []
   const regex = /^(?!\%)addpath\(["'](\S+)["']\)/gm
-  let m
+  let m: RegExpExecArray | null
   while ((m = regex.exec(str)) !== null) {
     // This is necessary to avoid infinite loops with zero-width matches
     if (m.index === regex.lastIndex) {
@@ -17,7 +17,7 @@ function matchAddPath(str) {
 
     // The result can be accessed through the `m`-variable.
     m.forEach(() => {
-      addPaths.push(m[1])
+      m && addPaths.push(m[1])
     })
   }
   return addPaths
@@ -28,7 +28,7 @@ function matchAddPath(str) {
  * for the reason that custom completion will overwrite original quick subbestions.
  * @param {string}} content current file's content
  */
-function getQuickSuggestions(content) {
+function getCurrentFileVariables(content: string): Array<string> {
   // Case 1: variableName = xxx
   // Case 2: at function line
   const regex = /\b([\w_]+)\b/gm
@@ -46,9 +46,30 @@ function getQuickSuggestions(content) {
       res.add(match)
     })
   }
-  const keywordSet = new Set(['break', 'case', 'catch', 'classdef', 'continue', 'else', 'elseif', 'end', 'for', 'function', 'global', 'if', 'otherwise', 'parfor', 'persistent', 'return', 'spmd', 'switch', 'try', 'while'])
+  const keywordSet = new Set([
+    "break",
+    "case",
+    "catch",
+    "classdef",
+    "continue",
+    "else",
+    "elseif",
+    "end",
+    "for",
+    "function",
+    "global",
+    "if",
+    "otherwise",
+    "parfor",
+    "persistent",
+    "return",
+    "spmd",
+    "switch",
+    "try",
+    "while",
+  ])
 
-  return [...res].filter(v => /[^0-9]\S+/.test(v) && !keywordSet.has(v))
+  return [...res].filter((v: any) => /[^0-9]\S+/.test(v) && !keywordSet.has(v)) as Array<string>
 }
 
 /**
@@ -56,11 +77,11 @@ function getQuickSuggestions(content) {
  * @param {string} fileName file name
  * @param {string} content current file's content
  */
-function getCommands(fileName, content) {
+function getCommands(fileName: string, content: string) {
   const dirPath = path.dirname(fileName)
-  const dirPaths = [dirPath]
+  const dirPaths: Array<string> = [dirPath]
 
-  let arr = []
+  let arr: Array<string> = []
   let addPaths = matchAddPath(content)
   addPaths.forEach((v) => {
     if (!path.isAbsolute(v)) {
@@ -74,13 +95,13 @@ function getCommands(fileName, content) {
     console.log(v)
     const mFileNames = fs
       .readdirSync(v)
-      .filter((v) => v.endsWith(".m"))
-      .map((v) => v.slice(0, v.length - 2))
+      .filter((v: string) => v.endsWith(".m"))
+      .map((v: string) => v.slice(0, v.length - 2))
     console.log(mFileNames)
     arr = arr.concat(mFileNames)
   })
 
-  const quickSuggestions = getQuickSuggestions(content)
+  const quickSuggestions = getCurrentFileVariables(content)
   arr = arr.concat(quickSuggestions)
 
   return [...new Set(arr)]
@@ -91,7 +112,7 @@ function getCommands(fileName, content) {
  * @param {string} content current file's content
  * @param {string} word target word to search
  */
-function getRowCol(content, word) {
+function getRowCol(content: string, word: string) {
   // Case 1: in body.
   const reg = new RegExp(`\\b${word}\\s*=`, "m")
   const res = content.match(reg)
@@ -128,8 +149,28 @@ function getRowCol(content, word) {
   return null
 }
 
-module.exports = {
-  getCommands,
+function getRangesByName(content: string, name: string){
+  const regex = new RegExp(`\\b${name}\\b`, "g")
+  let result: Array<{row: number, column: number}> = []
+  content.split("\n").forEach((v, i) => {
+    let m
+    while ((m = regex.exec(v)) !== null) {
+      // This is necessary to avoid infinite loops with zero-width matches
+      if (m.index === regex.lastIndex) {
+        regex.lastIndex++
+      }
+      result.push({
+        row: i,
+        column: m.index
+      })
+    }
+  })
+  return result
+}
+
+export default {
+  getCommands: getCommands,
   getRowCol,
-  getCurrentFileVariables: getQuickSuggestions,
+  getCurrentFileVariables,
+  getRangesByName,
 }
