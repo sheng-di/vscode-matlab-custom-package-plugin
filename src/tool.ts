@@ -92,12 +92,10 @@ function getCommands(fileName: string, content: string) {
   })
 
   dirPaths.forEach((v) => {
-    console.log(v)
     const mFileNames = fs
       .readdirSync(v)
       .filter((v: string) => v.endsWith(".m"))
       .map((v: string) => v.slice(0, v.length - 2))
-    console.log(mFileNames)
     arr = arr.concat(mFileNames)
   })
 

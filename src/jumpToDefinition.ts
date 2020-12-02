@@ -1,7 +1,7 @@
 import { ExtensionContext, Position } from 'vscode'
 import { TextDocument } from 'vscode'
-const vscode = require('vscode');
-const tool = require('./tool');
+import * as vscode from 'vscode'
+import tool from './tool'
 
 /**
  * Find the provider defined by the file, return a location if it matches, otherwise it will not be handled
