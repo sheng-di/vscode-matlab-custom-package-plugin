@@ -110,7 +110,7 @@ function getCommands(fileName: string, content: string) {
  * @param {string} content current file's content
  * @param {string} word target word to search
  */
-function getRowCol(content: string, word: string) {
+function getRowCol(content: string, word: string) : { row: number, col: number }{
   // Case 1: in body.
   const reg = new RegExp(`\\b${word}\\s*=`, "m")
   const res = content.match(reg)
