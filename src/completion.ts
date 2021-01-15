@@ -53,7 +53,6 @@ export default function (context: vscode.ExtensionContext) {
 				// get all text until the `position` and check if it reads `console.`
 				// and if so then complete if `log`, `warn`, and `error`
         const linePrefix = document.lineAt(position).text.substr(0, position.character);
-        console.log('linePrefix', linePrefix)
 
         const structNames = tool.getStructNames(document.fileName, document.getText())
         for (let name of structNames) {

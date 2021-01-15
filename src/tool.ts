@@ -9,6 +9,12 @@ type StructCompletion = {
   members: string[]
 }
 
+type FunctionCall = {
+  name: string,
+  params: string[],
+  returns: string[]
+}
+
 /**
  * Match and return dir paths in `addpath` command
  * @param {string} str current document content
@@ -187,9 +193,11 @@ function getRangesByName(content: string, name: string) {
 function findMemberNames(fileName: string, content: string, structName: string): string[] {
   const regex = new RegExp(`\\s?${structName}\\.(\\S+);?`, 'gm')
   const res = TextUtils.matchAll(content, regex)
-  let names = res.map(v => v[1].replace(';', ''))
+  let names = res.map(v => v[1].replace(';', '').replace(':', ''))
   // exclude variant member names
   names = names.filter(v => !v.includes('('))
+  // unique it
+  names = names.filter((v, i) => names.indexOf(v) === i)
   return names
 }
 
@@ -219,6 +227,21 @@ function getStructCompletions(fileName: string, content: string): StructCompleti
   })
 }
 
+function getFunctionCall (content: string) : FunctionCall[] {
+  let res : FunctionCall[] = []
+  // multiple returns
+  const regexMultiple = /\[(.+)\]\s*=\s*(\S+)\((.*)\)/g
+  const resMultiple = TextUtils.matchAll(content, regexMultiple)
+  res = res.concat(resMultiple.map(v => {
+    return {
+      name: v[2],
+      returns: v[1].replace(/\s/g, '').split(','),
+      params: v[3].replace(/\s/g, '').split(','),
+    }
+  }))
+  return res
+}
+
 export default {
   getCommands,
   getRowCol,
@@ -229,7 +252,7 @@ export default {
   getStructNames
 }
 
-// const filePath = 'C:\\Users\\sheng\\Documents\\code\\matlab\\quaternion_matlab\\日常行为分析\\feature_visualize\\getResultSingle.m'
-// const content = readContent(filePath)
-// const res = getStructCompletions('getResultSingle.m', content)
-// console.log(res)
+const filePath = 'C:\\Users\\sheng\\Documents\\code\\matlab\\quaternion_matlab\\日常行为分析\\feature_visualize\\feature_range_3d\\range_to_feature_importance.m'
+const content = readContent(filePath)
+const res = getFunctionCall(content)
+console.log(res)
