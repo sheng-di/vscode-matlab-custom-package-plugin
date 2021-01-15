@@ -1,5 +1,13 @@
+import { readContent } from "./utils/reader"
+import TextUtils from "./utils/TextUtils"
+
 const path = require("path")
 const fs = require("fs")
+
+type StructCompletion = {
+  name: string,
+  members: string[]
+}
 
 /**
  * Match and return dir paths in `addpath` command
@@ -77,7 +85,7 @@ function getCurrentFileVariables(content: string): Array<string> {
  * @param {string} fileName file name
  * @param {string} content current file's content
  */
-function getCommands(fileName: string, content: string) {
+function getCommands(fileName: string, content: string): string[] {
   const dirPath = path.dirname(fileName)
   const dirPaths: Array<string> = [dirPath]
 
@@ -110,7 +118,7 @@ function getCommands(fileName: string, content: string) {
  * @param {string} content current file's content
  * @param {string} word target word to search
  */
-function getRowCol(content: string, word: string) : { row: number, col: number } | null {
+function getRowCol(content: string, word: string): { row: number, col: number } | null {
   // Case 1: in body.
   const reg = new RegExp(`\\b${word}\\s*=`, "m")
   const res = content.match(reg)
@@ -146,9 +154,14 @@ function getRowCol(content: string, word: string) : { row: number, col: number }
   return null
 }
 
-function getRangesByName(content: string, name: string){
+/**
+ * get variable selection occurence ranges in the code content.
+ * @param content the code content
+ * @param name the variable name
+ */
+function getRangesByName(content: string, name: string) {
   const regex = new RegExp(`\\b${name}\\b`, "g")
-  let result: Array<{row: number, column: number}> = []
+  let result: Array<{ row: number, column: number }> = []
   content.split("\n").forEach((v, i) => {
     let m
     while ((m = regex.exec(v)) !== null) {
@@ -165,9 +178,58 @@ function getRangesByName(content: string, name: string){
   return result
 }
 
+/**
+ * find struct member names in code content
+ * @param fileName the file name
+ * @param content the code content
+ * @param structName the struct name
+ */
+function findMemberNames(fileName: string, content: string, structName: string): string[] {
+  const regex = new RegExp(`\\s?${structName}\\.(\\S+);?`, 'gm')
+  const res = TextUtils.matchAll(content, regex)
+  let names = res.map(v => v[1].replace(';', ''))
+  // exclude variant member names
+  names = names.filter(v => !v.includes('('))
+  return names
+}
+
+function getStructNames (fileName: string, content: string) : string[] {
+  // get all struct names
+  const regex = /([a-zA-Z\_][0-9a-zA-Z\_]*)\./gm
+  const res = TextUtils.matchAll(content, regex)
+  let structNames = res.map(v => v[1])
+  // unique it and exclude filename
+  const basename = fileName.slice(0, fileName.length - 2)
+  structNames = structNames.filter((v, i) => structNames.indexOf(v) === i && v !== basename)
+  return structNames
+}
+
+/**
+ * get struct completions from code content
+ * @param content the code content
+ */
+function getStructCompletions(fileName: string, content: string): StructCompletion[] {
+  // get all struct names
+  const structNames = getStructNames(fileName, content)
+  return structNames.map(name => {
+    return {
+      name: name,
+      members: findMemberNames(fileName, content, name)
+    }
+  })
+}
+
 export default {
-  getCommands: getCommands,
+  getCommands,
   getRowCol,
   getCurrentFileVariables,
   getRangesByName,
+  findMemberNames,
+  getStructCompletions,
+  getStructNames
 }
+
+// const filePath = 'C:\\Users\\sheng\\Documents\\code\\matlab\\quaternion_matlab\\日常行为分析\\feature_visualize\\getResultSingle.m'
+// const content = readContent(filePath)
+// const res = getStructCompletions('getResultSingle.m', content)
+// console.log(res)

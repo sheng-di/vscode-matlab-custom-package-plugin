@@ -29,6 +29,24 @@
 				"${workspaceFolder}/out/test/**/*.js"
 			],
 			"preLaunchTask": "npm: test-watch"
+		},
+		{
+			"name": "Current TS File",
+			"type": "node",
+			"request": "launch",
+			"args": [
+				"${relativeFile}"
+			],
+			"runtimeArgs": [
+				"--nolazy",
+				"-r",
+				"ts-node/register"
+			],
+			"sourceMaps": true,
+			"cwd": "${workspaceRoot}",
+			"protocol": "inspector",
+			"console": "integratedTerminal",
+			"internalConsoleOptions": "neverOpen"
 		}
 	]
 }
